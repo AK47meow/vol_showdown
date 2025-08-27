@@ -1,0 +1,10 @@
+streamlit
+yfinance
+numpy
+pandas
+scipy
+plotly
+matplotlib
+seaborn
+firebase-admin
+google-cloud-firestore>=2.16.0
