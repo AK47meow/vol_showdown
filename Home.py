@@ -24,7 +24,7 @@ ACQ = st.session_state.acq_src
 LEVEL = st.session_state.expertise_level
 
 # --- Initialisation Firebase ---
-db, _ = get_firebase()
+_, db = get_firebase()
 init_session_tracking()
 uid = st.session_state.logging_user_id
 track_page_view(PAGE_NAME, {"lang": LANG})
