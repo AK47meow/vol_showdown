@@ -161,6 +161,7 @@ def implied_vol_brentq(C, S, K, r, T, option_type):
 
 
 # run_analysis = my brain, Import data and plot
+@st.cache_data(ttl=1800, max_entries=8, show_spinner=False)
 def run_analysis(ticker, option_type="c"):
     """
     Fetches option chain data, calculates various option parameters including implied volatility,

@@ -10,6 +10,12 @@ from utils import (
     tr, event_with_dwell, track_page_view, finalize_session, init_session_tracking, mark_module_opened, start_timer, stop_timer_seconds, init_page_session_vars, render_feedback_quizz_sidebar
 )
 
+# --- Early redirect handler (top of the page)
+_nav = st.session_state.get("_nav_to")
+if _nav:
+    st.session_state["_nav_to"] = None
+    st.switch_page(_nav)
+
 # --- Initialisation session_state ---
 init_page_session_vars()
 
@@ -24,7 +30,7 @@ ACQ = st.session_state.acq_src
 LEVEL = st.session_state.expertise_level
 
 # --- Initialisation Firebase ---
-_, db = get_firebase()
+db, _ = get_firebase()
 init_session_tracking()
 uid = st.session_state.logging_user_id
 track_page_view(PAGE_NAME, {"lang": LANG})

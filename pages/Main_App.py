@@ -14,8 +14,11 @@ from utils import (
     event_with_dwell, finalize_session, init_session_tracking, init_page_session_vars, render_feedback_quizz_sidebar, is_advanced_level, is_beginner_level
 )
 
-# --- Page config ---
-st.set_page_config(page_title="IVS — Main App", page_icon="🏦", layout="wide")
+# --- Early redirect handler (top of the page)
+_nav = st.session_state.get("_nav_to")
+if _nav:
+    st.session_state["_nav_to"] = None
+    st.switch_page(_nav)
 
 # ---------- Graphique ----------
 def render_ivs_surface(xi, yi, zi):
@@ -59,52 +62,9 @@ track_page_view(PAGE_NAME, {"lang": LANG})
 init_session_tracking()
 start_timer("page_timer", {"page_name": PAGE_NAME})
 
-
-# --- Session status banner + CTAs (FR/EN) ---
-feedback_done_now = bool(st.session_state.get("feedback_submitted_session"))
-
-st.markdown("---")
-if not feedback_done_now:
-    st.info(tr(
-        "👋 Before you leave, please complete the feedback to close your session.",
-        "👋 Avant de partir, merci de compléter le feedback pour clôturer votre session."
-    ))
-    c1, c2 = st.columns([1,1])
-    with c1:
-        if st.button(tr("📝 Go to Feedback", "📝 Aller au Feedback"), key="go_feedback_from_main"):
-            seconds = stop_timer_seconds("page_timer", "page_leave", {"to": "Feedback", "from": PAGE_NAME})
-            st.session_state["_nav_to"] = "pages/Feedback.py"
-            st.rerun()
-    with c2:
-        st.caption(tr(
-            "Your session will be finalized after you submit the feedback.",
-            "Votre session sera finalisée après l’envoi du feedback."
-        ))
-else:
-    st.success(tr(
-        "✅ Feedback submitted. You can now close your session.",
-        "✅ Feedback envoyé. Vous pouvez maintenant clôturer votre session."
-    ))
-    c1, c2 = st.columns([1,1])
-    with c1:
-        if st.button(tr("✅ End my session", "✅ Clôturer ma session"), key="close_session_from_main"):
-            try:
-                finalize_session()
-            except Exception:
-                pass
-            st.session_state["_nav_to"] = "Home.py"
-            st.rerun()
-    with c2:
-        if st.button(tr("🏠 Back to Home", "🏠 Retour à l’accueil"), key="back_home_from_main"):
-            seconds = stop_timer_seconds("page_timer", "page_leave", {"to": "Home", "from": PAGE_NAME})
-            st.session_state["_nav_to"] = "Home.py"
-            st.rerun()
-st.markdown("---")
-
 # --- Sidebar: Feedback + Missions --- #
 with st.sidebar:
     st.markdown("## " + tr("🎮 Missions", "🎮 Missions"))
-
     # Ticker progress
     num_tickers = len(st.session_state.get("tickers_tested", []))
     ticker_score = min(num_tickers / 5, 1.0)
@@ -113,31 +73,31 @@ with st.sidebar:
     num_modules = len(st.session_state.get("modules_opened", []))
     module_score = min(num_modules / 2, 1.0)
 
-    # ✅ Final quiz: rely on session flags set at submission time
-    quiz_done = bool(st.session_state.get("quiz_final_done"))
-    final_quiz_score = st.session_state.get("quiz_final_score")  # int or None
-    quiz_score = 1.0 if quiz_done else 0.0
+    # Final quiz
+    final_score = st.session_state.get("final_score", None)
+    quiz_done = final_score is not None
+    quiz_score = 1.0 if final_score is not None else 0.0
 
-    # ✅ Feedback quiz: use session flag set when feedback is submitted
-    feedback_done = bool(st.session_state.get("feedback_submitted_session"))
+    # Feedback quiz
+    feedback_done = st.session_state.get("feedback_submitted", False)
     feedback_score = 1.0 if feedback_done else 0.0
 
-    # Global progress
+    # Score total avec suivi progression %
     total = (ticker_score + module_score + quiz_score + feedback_score) / 4
-    st.markdown(f"**{tr('Global progress', 'Progression globale')}**: `{int(total*100)}%`")
+    st.markdown(f"**Progression globale**: `{int(total*100)}%`")
     st.progress(total)
 
     st.markdown("### " + tr("✅ Objectives", "✅ Objectifs"))
-    st.markdown(tr(f"- 💹 Tested tickers: **{num_tickers}/5**", f"- 💹 Tickers testés : **{num_tickers}/5**"))
-    st.markdown(tr(f"- 📚 Modules opened: **{num_modules}/2**", f"- 📚 Modules ouverts : **{num_modules}/2**"))
-    st.markdown(tr(
-        f"- 🧠 Final quiz: {'✅' if quiz_done else '❌'}" + (f"  (score {final_quiz_score}/5)" if final_quiz_score is not None else ""),
-        f"- 🧠 Quizz final : {'✅' if quiz_done else '❌'}" + (f"  (score {final_quiz_score}/5)" if final_quiz_score is not None else "")
-    ))
-    st.markdown(tr(
-        f"- 🗣 Feedback: {'✅' if feedback_done else '❌'}",
-        f"- 🗣 Feedback : {'✅' if feedback_done else '❌'}"
-    ))
+    st.markdown(tr(f"- 💹 Tested tickers: **{num_tickers}/5**", f"- 💹 Test tickers: **{num_tickers}/5**"))
+    st.markdown(tr(f"- 📚 Modules opened: **{num_modules}/2**", f"- 📚 Modules ouverts: **{num_modules}/2**"))
+    st.markdown(tr(f"- 🧠 Final quiz: {'✅' if quiz_score else '❌'}",
+                   f"- 🧠 Quizz final: {'✅' if quiz_score else '❌'}"))
+    st.markdown(tr(f"- 🗣 Feedback: {'✅' if feedback_done else '❌'}",
+                   f"- 🗣 Feedback: {'✅' if feedback_done else '❌'}"))
+
+
+# --- Page config ---
+st.set_page_config(page_title="IVS — Main App", page_icon="🏦", layout="wide")
 
 # ---------- Traductions ----------
 def T(lang):
@@ -156,6 +116,10 @@ def T(lang):
             start_assess="Démarrer l'évaluation finale",
             df_title="Données de la chaîne d'options",
             df_note="Ces données proviennent de votre fonction run_analysis dans logic.py."
+            us_only_msg="⚠️ Cette app fonctionne uniquement avec des **tickers américains** 🇺🇸.\n\n"
+                        "Pourquoi ? Parce que j’utilise une API gratuite (`yfinance`) et je n’avais pas envie "
+                        "de vendre un rein 💸 pour payer l’accès aux marchés du monde entier.\n\n"
+                        "👉 Merci d’utiliser des tickers comme **AAPL, MSFT, GOOG…**",
         )
     return dict(
         title="Implied Volatility Surface (IVS)",
@@ -171,6 +135,10 @@ def T(lang):
         start_assess="Start Final Assessment",
         df_title="Options Chain Data",
         df_note="These data come from your run_analysis function in logic.py."
+        us_only_msg="⚠️ This app only works with **US tickers** 🇺🇸.\n\n"
+                    "Why? Because I’m using a free API (`yfinance`) and didn’t feel like selling a kidney 💸 "
+                    "to pay for global market data.\n\n"
+                    "👉 Please stick to symbols like **AAPL, MSFT, GOOG…**",
     )
 
 Txt = T(LANG)
@@ -179,6 +147,7 @@ Txt = T(LANG)
 st.title(Txt["title"])
 st.markdown(Txt["desc"])
 st.markdown("---")
+st.info(Txt["us_only_msg"])
 
 # --- Params de la page + Enregistrement KPI nb Tickers ---
 ticker = st.text_input(Txt["ticker_label"], value="AAPL")
