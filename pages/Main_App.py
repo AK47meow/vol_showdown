@@ -115,11 +115,13 @@ def T(lang):
             open_modules="Ouvrir le module d'introduction",
             start_assess="Démarrer l'évaluation finale",
             df_title="Données de la chaîne d'options",
-            df_note="Ces données proviennent de votre fonction run_analysis dans logic.py."
-            us_only_msg="⚠️ Cette app fonctionne uniquement avec des **tickers américains** 🇺🇸.\n\n"
-                        "Pourquoi ? Parce que j’utilise une API gratuite (`yfinance`) et je n’avais pas envie "
-                        "de vendre un rein 💸 pour payer l’accès aux marchés du monde entier.\n\n"
-                        "👉 Merci d’utiliser des tickers comme **AAPL, MSFT, GOOG…**",
+            df_note="Ces données proviennent de votre fonction run_analysis dans logic.py.",
+            us_only_title="ℹ️ Données US uniquement",
+            us_only_body=(
+                "Pour le moment, l’IVS utilise des sources gratuites qui couvrent surtout les **actions US** "
+                "(tickers type *AAPL, MSFT, TSLA*). Pas (encore) d’univers mondial. "
+                "Merci d’entrer un **ticker US** 🙏"
+            ),
         )
     return dict(
         title="Implied Volatility Surface (IVS)",
@@ -134,12 +136,15 @@ def T(lang):
         open_modules="Open Introduction module",
         start_assess="Start Final Assessment",
         df_title="Options Chain Data",
-        df_note="These data come from your run_analysis function in logic.py."
-        us_only_msg="⚠️ This app only works with **US tickers** 🇺🇸.\n\n"
-                    "Why? Because I’m using a free API (`yfinance`) and didn’t feel like selling a kidney 💸 "
-                    "to pay for global market data.\n\n"
-                    "👉 Please stick to symbols like **AAPL, MSFT, GOOG…**",
+        df_note="These data come from your run_analysis function in logic.py.",
+        us_only_title="ℹ️ US tickers only",
+        us_only_body=(
+            "Right now the IVS uses free sources that mainly cover **US equities** "
+            "(tickers like *AAPL, MSFT, TSLA*). Global universe not (yet) included. "
+            "Please enter a **US ticker** 🙏"
+        ),
     )
+
 
 Txt = T(LANG)
 
