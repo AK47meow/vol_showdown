@@ -117,7 +117,7 @@ def T(lang):
             df_title="Données de la chaîne d'options",
             df_note="Ces données proviennent de votre fonction run_analysis dans logic.py.",
             us_only_title="ℹ️ Données US uniquement",
-            us_only_body=(
+            us_only_msg=(
                 "Pour le moment, l’IVS utilise des sources gratuites qui couvrent surtout les **actions US** "
                 "(tickers type *AAPL, MSFT, TSLA*). Pas (encore) d’univers mondial. "
                 "Merci d’entrer un **ticker US** 🙏"
@@ -138,7 +138,7 @@ def T(lang):
         df_title="Options Chain Data",
         df_note="These data come from your run_analysis function in logic.py.",
         us_only_title="ℹ️ US tickers only",
-        us_only_body=(
+        us_only_msg=(
             "Right now the IVS uses free sources that mainly cover **US equities** "
             "(tickers like *AAPL, MSFT, TSLA*). Global universe not (yet) included. "
             "Please enter a **US ticker** 🙏"
